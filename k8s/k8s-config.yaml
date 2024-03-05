@@ -1,0 +1,366 @@
+---
+# Source: reco-film/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+data:
+  SECRET_KEY:  "c2VjcmV0"
+  ALGORITHM: "SFMyNTY="
+  ACCESS_TOKEN_EXPIRATION:  "MzA="
+  DBNAME: "cG9zdGdyZXM="
+  USER: "cG9zdGdyZXM="
+  PASSWORD: "cmVjb21tZW5kYXRpb25fZmlsbXNfb2N0XzIzX01MT1BT"
+  HOST: "cmVjby1maWxtcy1kYi5jazJ1dXZqOHRnNWIuZXUtd2VzdC0zLnJkcy5hbWF6b25hd3MuY29t"
+  PORT: "NTQzMg=="
+  MLFLOW_SERVER: "aHR0cDovLzEzLjM5LjgwLjEyMjo1MDAwLw=="
+---
+# Source: reco-film/templates/configmap-prometheus.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "grafana-config-prd"
+  labels:
+    helm.sh/chart: reco-film-0.1.0
+    app.kubernetes.io/name: reco-film
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      evaluation_interval: 15s
+    alerting:
+      alertmanagers:
+      - follow_redirects: true
+        enable_http2: true
+        scheme: http
+        timeout: 10s
+        api_version: v2
+        static_configs:
+        - targets: []
+    scrape_configs:
+    - job_name: prometheus
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      follow_redirects: true
+      enable_http2: true
+      static_configs:
+      - targets:
+        - localhost:9090
+    - job_name: "movieflix-api"
+      scrape_interval: 10s
+      metrics_path: /metrics
+      static_configs:
+        - targets: ["movieflix-api-prd:8002" ]
+---
+# Source: reco-film/templates/service-grafana.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: "grafana-prd"
+  labels:
+    helm.sh/chart: reco-film-0.1.0
+    app.kubernetes.io/name: reco-film
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3001
+      targetPort: 3000
+      nodePort:  30301
+      protocol: TCP
+  selector:
+    app: "grafana-prd"
+---
+# Source: reco-film/templates/service-prometheus.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: "prometheus-prd"
+  labels:
+    helm.sh/chart: reco-film-0.1.0
+    app.kubernetes.io/name: reco-film
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 9091
+      targetPort: 9090
+      nodePort:  30091
+      protocol: TCP
+  selector:
+    app: "prometheus-prd"
+---
+# Source: reco-film/templates/service_api.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: "movieflix-api-prd"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8002
+    targetPort: 8001
+    protocol: TCP
+  selector:
+    app: "movieflix-api-prd"
+---
+# Source: reco-film/templates/service_streamlit.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: "movieflix-streamlit-prd"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8506
+      targetPort: 8504
+      nodePort:  30021
+      protocol: TCP
+  selector:
+    app: "movieflix-streamlit-prd"
+---
+# Source: reco-film/templates/deployement-grafana.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "grafana-prd"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "grafana-prd"
+  template:
+    metadata:
+      labels:
+        app: "grafana-prd"
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana
+        volumeMounts:
+        - mountPath: /var/lib/grafana
+          name: grafana-volume
+        imagePullPolicy:  Always
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            cpu: 30m
+            ephemeral-storage: 100Mi
+            memory: 100Mi
+          requests:
+            cpu: 30m
+            ephemeral-storage: 100Mi
+            memory: 100Mi
+      volumes:
+      - name: grafana-volume
+        emptyDir:
+          sizeLimit: 500Mi
+---
+# Source: reco-film/templates/deployement-premetheus.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "prometheus-prd"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "prometheus-prd"
+  template:
+    metadata:
+      labels:
+        app: "prometheus-prd"
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9091
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/etc/prometheus/"
+        command:
+        - "/bin/prometheus"
+        args:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        resources:
+          limits:
+            cpu: 50m
+            ephemeral-storage: 200Mi
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            ephemeral-storage: 200Mi
+            memory: 100Mi
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "grafana-config-prd"
+---
+# Source: reco-film/templates/deployment_api.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "movieflix-api-prd"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "movieflix-api-prd"
+  template:
+    metadata:
+      labels:
+        app: "movieflix-api-prd"
+    spec:
+      containers:
+      - name: movieflix-api
+        image: recofilmsmlopsoct2023/movieflix-api:38e527d
+        env:
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: SECRET_KEY
+          - name: ALGORITHM
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: ALGORITHM          
+          - name: ACCESS_TOKEN_EXPIRATION
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: ACCESS_TOKEN_EXPIRATION
+          - name: DBNAME
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: DBNAME
+          - name: USER
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: USER          
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: PASSWORD
+          - name: HOST
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: HOST
+          - name: PORT
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: PORT
+          - name: MLFLOW_SERVER
+            valueFrom:
+              secretKeyRef:
+                name:  mysecret
+                key: MLFLOW_SERVER
+          - name: MLFLOW_MODELID
+            value: "1"
+          - name: ENV
+            value: "prd"
+          - name: TAG
+            value: 38e527d
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8001
+        resources:
+          limits:
+            cpu: 100m
+            ephemeral-storage: 350Mi
+            memory: 350Mi
+
+          requests:
+            cpu: 100m
+            ephemeral-storage: 350Mi
+            memory: 350Mi
+---
+# Source: reco-film/templates/deployment_streamlit.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "movieflix-streamlit-prd"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "movieflix-streamlit-prd"
+  template:
+    metadata:
+      labels:
+        app: "movieflix-streamlit-prd"
+    spec:
+      containers:
+      - name: movieflix-streamlit
+        image: recofilmsmlopsoct2023/movieflix-streamlit:38e527d
+        env:
+          - name: APIURL
+            value: "http://movieflix-api-prd:8002"
+          - name: STREAMLIT_SERVER_PORT
+            value: "8506"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8504
+        resources:
+          limits:
+            cpu: 200m
+            ephemeral-storage: 400Mi
+            memory: 200Mi
+          requests:
+            cpu: 200m
+            ephemeral-storage: 400Mi
+            memory: 200Mi
+---
+# Source: reco-film/templates/ingress-api.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: movieflix-ingress-api-prd
+spec:
+  rules:
+  - http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+             service:
+              name: "movieflix-api-prd"
+              port: 
+                number: 8002
+---
+# Source: reco-film/templates/ingress-streamlit.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: movieflix-ingress-streamlit-prd
+spec:
+  rules:
+  - http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+             service:
+              name: "movieflix-streamlit-prd"
+              port: 
+                number: 8506
