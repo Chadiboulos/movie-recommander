@@ -5,9 +5,9 @@ name: CI-CD-DEV-PRD
 
 on:
   push:
-    branches: ['master', 'developpement' ]
+    branches: ['main', 'developpement' ]
   pull_request:
-    branches: ['master','developpement' ]
+    branches: ['main','developpement' ]
 
 permissions:
   contents: read
@@ -92,7 +92,7 @@ jobs:
     - name: CD Update Helm Repo change TAG
       run: |
         ENVDIR=""
-        if [ $BRANCH_NAME == master ]; then ENVDIR=PRD; fi
+        if [ $BRANCH_NAME == main ]; then ENVDIR=PRD; fi
         if [ $BRANCH_NAME == developpement ]; then ENVDIR=DEV; fi
         echo "$BRANCH_NAME -- $ENVDIR"
         if [ -n $ENVDIR ]; then
