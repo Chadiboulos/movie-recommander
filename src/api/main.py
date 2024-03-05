@@ -95,7 +95,7 @@ movies_df_cleaned = movies_df.assign(
                                                      regex=True))
 
 title_to_movieid = dict(zip(movies_df_cleaned['title'],
-                            movies_df['movieid']))
+                            movies_df['movieid' ]))
 cleaned_to_initial_title = dict(
     zip(movies_df_cleaned['title'],
         movies_df['title']))
