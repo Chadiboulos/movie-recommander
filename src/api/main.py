@@ -34,9 +34,6 @@ from mlflow_model import load_mlflow_model
 ENV = os.environ.get("ENV", "")
 sha_id = os.environ.get('TAG', "")
 
-# Initializing Prometheus Instrumentator
-
-
 # Initializing FastAPI app with title, description, version, and tags
 app = FastAPI(title="Movie Recommender"+" - "+ENV,
               description=f"Interface to get \
