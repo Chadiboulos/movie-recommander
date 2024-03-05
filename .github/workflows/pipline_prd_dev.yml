@@ -1,0 +1,110 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: CI-CD-DEV-PRD
+
+on:
+  push:
+    branches: ['master', 'developpement' ]
+  pull_request:
+    branches: ['master','developpement' ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-cd:
+
+    runs-on: ubuntu-latest
+    env:
+      DBNAME: ${{ secrets.DBNAME }}
+      USER: ${{ secrets.USER }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      HOST: ${{ secrets.HOST }}
+      PORT: ${{ secrets.PORT }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALGORITHM: ${{ secrets.ALGORITHM }}
+      ACCESS_TOKEN_EXPIRATION: ${{ secrets.ACCESS_TOKEN_EXPIRATION }}
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+    steps:
+    - uses: actions/checkout@v3
+      name: Chekout
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade setuptools wheel
+        if [ -f ./src/api/requirements.txt ]; then pip install -r ./src/api/requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      run: |
+        pytest
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Get short Commit SHA
+      run: |
+        echo "SHA_ID=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo ${{ env.SHA_ID }}
+
+    - name: Build and Push Docker Image API
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: recofilmsmlopsoct2023/movieflix-api:${{ env.SHA_ID }}
+        platforms: linux/amd64,linux/arm64
+        context: ./src/api
+        file: ./src/api/Dockerfile
+    
+    - name: Build and Push Docker Image Streamlit (Front)
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: recofilmsmlopsoct2023/movieflix-streamlit:${{ env.SHA_ID }}
+        platforms: linux/amd64,linux/arm64
+        context: ./streamlit
+        file: ./streamlit/Dockerfile
+    
+    - name: CD Checkout helm repository
+      uses: actions/checkout@v2
+      with:
+        repository: 'Jbdu4493/oct23_cmlops_reco_films_helm'  # Remplacez par le nom d'utilisateur/nom du dépôt
+        token: ${{ secrets.GITOKEN }}  # Token d'accès personnel avec les droits nécessaires
+        path: 'helm_repo'  # Dossier local pour le dépôt
+
+    - name: CD Update Helm Repo change TAG
+      run: |
+        ENVDIR=""
+        if [ $BRANCH_NAME == master ]; then ENVDIR=PRD; fi
+        if [ $BRANCH_NAME == developpement ]; then ENVDIR=DEV; fi
+        echo "$BRANCH_NAME -- $ENVDIR"
+        if [ -n $ENVDIR ]; then
+          sed -i 's/^  tag:.*/  tag: ${{ env.SHA_ID }}/g' helm_repo/$ENVDIR/values.yaml;
+        fi
+
+    - name: CD Commit and Push Helm Repo
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        repository: ./helm_repo
+        commit_message: 'CD tag ${{ env.SHA_ID }} pour l environnement de  ${{ env.ENV_DIR }}'  # Votre message de commit
+        branch: 'main'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITOKEN }}  # Utilisez le même token pour l'authentification
+      
