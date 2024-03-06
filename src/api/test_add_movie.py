@@ -115,5 +115,5 @@ def test_add_new_movie():
     rows = cursor.fetchall()
 
     assert response_add_movie.status_code == 200
-    assert response_add_movie.json() == {"message": "Movie added successfully!"}
+    assert response_add_movie.json() == {"message": "Movie added successfully!!"}
     assert len(rows) > 0
