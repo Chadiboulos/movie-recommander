@@ -64,7 +64,7 @@ jobs:
         echo "SHA_ID=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
         echo ${{ env.SHA_ID }}
     
-    - name: Build and Push Docker Image API
+    - name: Build and Push Docker Airflow
       uses: docker/build-push-action@v5
       with:
         push: true
