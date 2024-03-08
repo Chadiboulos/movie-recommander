@@ -63,6 +63,15 @@ jobs:
       run: |
         echo "SHA_ID=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
         echo ${{ env.SHA_ID }}
+    
+    - name: Build and Push Docker Image API
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: recofilmsmlopsoct2023/airflow:${{ env.SHA_ID }}
+        platforms: linux/amd64,linux/arm64
+        context: ./airflow
+        file: ./airflow/Dockerfile
 
     - name: Build and Push Docker Image API
       uses: docker/build-push-action@v5
