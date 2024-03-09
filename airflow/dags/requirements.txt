@@ -7,3 +7,4 @@ requests
 scikit-learn
 scikit-surprise
 psycopg2-binary==2.9.9
+connexion[swagger-ui]    
