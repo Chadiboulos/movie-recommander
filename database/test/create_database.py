@@ -82,24 +82,14 @@ def insert_sql_movie(row):
             insert_query = """INSERT INTO movie (movieid, title, imdbid, tmdbid, year, decade)
             VALUES (%s, %s, %s, %s, %s, %s);
             """
-            title = row["title"]
-            match = re.search(r'\((\d{4})\)', title)
-            year = int(match.group(1)) if match else None
-            decade = (year // 10) * 10 if year else None
-
-            # It's a good idea to check if year is None before proceeding
-            if year is None:
-                # Handle the case where the year couldn't be extracted
-                print(f"Year could not be extracted for title: {title}")
-                return
 
             data_to_insert = (
                 int(row["movieId"]),
                 row["title"],
                 row["imdbId"],
                 row["tmdbId"] if row["tmdbId"] else None,
-                year,
-                decade
+                row["year"],
+                row["decade"]
             )
             cur.execute(insert_query, data_to_insert)
 
