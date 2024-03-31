@@ -173,9 +173,14 @@ def load_model_saved():
         statement = """select mlflow_run_id
                       from model_prediction
                       where end_date is null;"""
-        mlflow_run_id = connection.execute(text(statement)).first()[0]
-    return load_model_from_mlflow_runid(mlflow_run_id)
+        modele_predict_row = connection.execute(text(statement))
+        if len(modele_predict_row ) != 0:
+            mlflow_run_id = modele_predict_row.first()[0]
+            modele = load_model_from_mlflow_runid(mlflow_run_id)
 
+        else:
+            modele =  None
+    return modele
 
 def best_model_runid(task_instance, **kwargs):
 
@@ -221,30 +226,35 @@ def comparer_choisir_model(task_instance):
     run_id = task_instance.xcom_pull(key="best_model_run_id")
     best_model = load_model_from_mlflow_runid(run_id)
     model_in_prod = load_model_saved()
-
-    predict_best_model = best_model.test(testset)
-    predict_model_saved = model_in_prod.test(testset)
-    rmse_best_model = accuracy.rmse(predict_best_model)
-    rmse_model_prod = accuracy.rmse(predict_model_saved)
-
-    if rmse_best_model < rmse_model_prod:
-        with engine.connect() as connect:
-            q_id_model = """select modelid
-                            from model_prediction mp
-                            where mp.end_date is null ;"""
-            mp_id = connect.execute(text(q_id_model)).first()[0]
-
+    if model_in_prod is None:
         mp = get_modele_prediction_from(run_id)
         insert = generer_requete_insert_model_prediction(mp)
         with engine.connect() as connect:
             connect.execute(text(insert))
+    else:
+        predict_best_model = best_model.test(testset)
+        predict_model_saved = model_in_prod.test(testset)
+        rmse_best_model = accuracy.rmse(predict_best_model)
+        rmse_model_prod = accuracy.rmse(predict_model_saved)
 
-        with engine.connect() as connect:
-            update = f"""update model_prediction
-                         set end_date = CURRENT_TIMESTAMP
-                         where modelid = {mp_id};"""
-            connect.execute(text(update))
-        print("Nouveau modèle!!!!!")
+        if rmse_best_model < rmse_model_prod:
+            with engine.connect() as connect:
+                q_id_model = """select modelid
+                                from model_prediction mp
+                                where mp.end_date is null ;"""
+                mp_id = connect.execute(text(q_id_model)).first()[0]
+
+            mp = get_modele_prediction_from(run_id)
+            insert = generer_requete_insert_model_prediction(mp)
+            with engine.connect() as connect:
+                connect.execute(text(insert))
+
+            with engine.connect() as connect:
+                update = f"""update model_prediction
+                            set end_date = CURRENT_TIMESTAMP
+                            where modelid = {mp_id};"""
+                connect.execute(text(update))
+            print("Nouveau modèle!!!!!")
 
 
 my_task1_init = PythonOperator(

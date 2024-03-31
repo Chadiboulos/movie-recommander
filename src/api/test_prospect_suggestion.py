@@ -7,10 +7,9 @@ client = TestClient(app=app)
 
 
 @pytest.mark.parametrize("scenario, input_data, expected_status, expected_output_check", [
-    ("decade_2010", {'decade': 2010}, 200, lambda x: len(x['top_movies']) > 0),
+    ("decade_1990", {'decade': 1990}, 200, lambda x: len(x['top_movies']) > 0),
     ("genre_zzz", {'genre': 'zzz'}, 200, lambda x: len(x['top_movies']) == 0),
-    ("decade_1700", {'decade': 1700}, 200,
-     lambda x: len(x['top_movies']) == 0),
+    ("decade_1700", {'decade': 1700}, 200, lambda x: len(x['top_movies']) == 0),
 ])
 def test_prospect_suggestion(scenario, input_data, expected_status, expected_output_check):
     """
@@ -36,4 +35,7 @@ def test_prospect_suggestion(scenario, input_data, expected_status, expected_out
 
     assert response.status_code == expected_status
 
+    print(response.status_code)
+    print(response.json()["top_movies"])
     assert expected_output_check(response.json())
+   
