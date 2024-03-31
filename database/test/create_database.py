@@ -10,7 +10,7 @@ user = 'postgres'
 password = 'recommendation_films_oct_23_MLOPS'
 host = 'localhost'
 
-sql_file = sorted(glob.glob("./sql/*"))
+sql_file = sorted(glob.glob("./database/test/sql/*"))
 
 movie_to_keep = [1,2,23]
 

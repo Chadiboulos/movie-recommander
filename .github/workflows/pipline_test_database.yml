@@ -46,6 +46,9 @@ jobs:
         POSTGRES_USER: postgres
         POSTGRES_PW: recommendation_films_oct_23_MLOPS
         POSTGRES_DB: postgres
+    - name : Insert data
+      run: |
+        python3 ./database/test/create_database.py
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
