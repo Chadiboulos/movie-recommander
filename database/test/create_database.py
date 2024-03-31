@@ -12,10 +12,12 @@ host = 'localhost'
 
 sql_file = sorted(glob.glob("./database/test/sql/*"))
 
-movie_to_keep = [1,2,23]
+movie_to_keep = [1, 2, 23]
+
 
 def executesql(fichier_sql):
-    conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)
+    conn = psycopg2.connect(dbname=dbname, user=user,
+                            password=password, host=host)
     # Créer un objet cursor
     cur = conn.cursor()
 
@@ -28,48 +30,51 @@ def executesql(fichier_sql):
         # Exécute chaque commande individuellement
         for command in commands:
             if command.strip() != '':  # Vérifie si la commande n'est pas vide
-                    print(command)
-                    cur.execute(command)
-                    conn.commit()
+                print(command)
+                cur.execute(command)
+                conn.commit()
     # Fermer la communication avec la base de données
     conn.commit()
     cur.close()
     conn.close()
+
+
 def execute_all_sql(sql_file):
     for file in sql_file:
-            print(file)
-            executesql(file)
+        print(file)
+        executesql(file)
 
 
-
-rating = pd.read_csv("./ml-latest-small/ratings.csv")
-movie = pd.read_csv("./ml-latest-small/movies.csv")
-link= pd.read_csv("./ml-latest-small/links.csv")
-
+rating = pd.read_csv("./database/test/ml-latest-small/ratings.csv")
+movie = pd.read_csv("./database/test/ml-latest-small/movies.csv")
+link = pd.read_csv("./database/test/ml-latest-small/links.csv")
 
 
-movie=movie.merge(link,on="movieId")
-movie=movie.replace(np.nan,"")
+movie = movie.merge(link, on="movieId")
+movie = movie.replace(np.nan, "")
+
 
 def get_year(row):
     title = row["title"]
     match = re.search(r'\((\d{4})\)', title)
     year = int(match.group(1)) if match else 0
     return year
+
+
 def get_decade(row):
     year = int(row["year"])
     return (year//10)*10
 
-movie['year'] = movie.apply(get_year,axis=1)
-movie['decade'] = movie.apply(get_decade,axis=1)
+
+movie['year'] = movie.apply(get_year, axis=1)
+movie['decade'] = movie.apply(get_decade, axis=1)
 
 
-movie = movie[movie['decade'] == 1990 ].head(30)
+movie = movie[movie['decade'] == 1990].head(30)
 
 
-rating = rating[ rating.movieId.isin( movie.movieId)]
+rating = rating[rating.movieId.isin(movie.movieId)]
 
-import re
 
 def insert_sql_movie(row):
     with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
@@ -98,6 +103,7 @@ def insert_sql_movie(row):
             )
             cur.execute(insert_query, data_to_insert)
 
+
 def insert_sql_rating(row):
     try:
         # Utilisation de gestionnaires de contexte pour la connexion et le curseur
@@ -107,7 +113,8 @@ def insert_sql_rating(row):
                                   VALUES (%s, %s, %s, %s);"""
                 data_to_insert = (
                     int(row["userId"]),
-                    int(row["movieId"]),  # Assurez-vous que movieId est également un entier
+                    # Assurez-vous que movieId est également un entier
+                    int(row["movieId"]),
                     row["rating"],
                     row["timestamp"]
                 )
@@ -119,7 +126,6 @@ def insert_sql_rating(row):
     return 0
 
 
-
 def create_movie_genre_df():
     with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
         with conn.cursor() as cur:
@@ -128,11 +134,11 @@ def create_movie_genre_df():
             rows = cur.fetchall()
             movie_genres = pd.DataFrame()
             for row in rows:
-                movie_genre = movie[ movie['genres'].str.contains(row[1], case=False, na=False)][["movieId"]]
-                movie_genre["genreId"]=[row[0]]*len(movie_genre)
-                movie_genres=pd.concat((movie_genres,movie_genre),axis=0)
+                movie_genre = movie[movie['genres'].str.contains(
+                    row[1], case=False, na=False)][["movieId"]]
+                movie_genre["genreId"] = [row[0]]*len(movie_genre)
+                movie_genres = pd.concat((movie_genres, movie_genre), axis=0)
     return movie_genres
-    
 
 
 def insert_sql_movie_genre(row):
@@ -141,19 +147,21 @@ def insert_sql_movie_genre(row):
             with conn.cursor() as cur:
                 insert_query = """INSERT INTO movie_genre ( movieid, genreid)
                                   VALUES (%s, %s);"""
-                cur.execute(insert_query,(int(row["movieId"]),int(row['genreId'])))
+                cur.execute(
+                    insert_query, (int(row["movieId"]), int(row['genreId'])))
     except Exception:
         print(
-              (
-               int(row["movieId"]),
-               int(row['genreId'])
-               )
-              )
+            (
+                int(row["movieId"]),
+                int(row['genreId'])
+            )
+        )
         return 1
     return 0
 
+
 def refresh_table_recap_view():
-    #Refresh de la vue table_recap_view
+    # Refresh de la vue table_recap_view
     try:
         with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
             with conn.cursor() as cur:
@@ -161,6 +169,8 @@ def refresh_table_recap_view():
                 cur.execute(refresh_query)
     except Exception as e:
         print("Error for refresh Table Recap {e}")
+
+
 def insert_fake_imdb_data(movie):
     for movieid in set(movie["movieId"]):
         try:
@@ -173,11 +183,11 @@ def insert_fake_imdb_data(movie):
         except Exception as e:
             print("Error for refresh Table Recap {e}")
 
+
 execute_all_sql(sql_file)
-movie.apply(insert_sql_movie,axis=1)
-rating.apply(insert_sql_rating,axis=1)
+movie.apply(insert_sql_movie, axis=1)
+rating.apply(insert_sql_rating, axis=1)
 movie_genres = create_movie_genre_df()
-movie_genres.apply(insert_sql_movie_genre,axis=1)
+movie_genres.apply(insert_sql_movie_genre, axis=1)
 refresh_table_recap_view()
 insert_fake_imdb_data(movie)
-
