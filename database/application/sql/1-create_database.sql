@@ -59,8 +59,6 @@ CREATE TABLE rating (
 	movieid int4 NOT NULL,
 	rating float8 NOT NULL,
 	"timestamp" int4 NOT NULL,
-	"year" int4 NULL,
-	decade int4 NULL,
 	CONSTRAINT rating_pkey PRIMARY KEY (userid, movieid),
 	CONSTRAINT rating_movieid_fkey FOREIGN KEY (movieid) REFERENCES movie(movieid)
 );
