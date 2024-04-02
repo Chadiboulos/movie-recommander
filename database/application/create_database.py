@@ -5,13 +5,25 @@ import pandas as pd
 import os
 import re
 import datetime
+import time
 dbname = os.environ.get("POSTGRES_DB")
 user = os.environ.get("POSTGRES_USER")
-password = os.environ.get("POSTGRES_PW")
+password = os.environ.get("POSTGRES_PASSWORD")
 host = os.environ.get("POSTGRES_HOST")
 port = int(os.environ.get("POSTGRES_PORT"))
 print(datetime.datetime.now())
 sql_file = sorted(glob.glob("./sql/*"))
+
+def wait_database_connexion():
+    while(True):
+        try:
+            conn = psycopg2.connect(dbname=dbname, user=user,
+                            password=password, host=host, port=port)
+            print("Connextion !!!")
+            return 0
+        except Exception as e:
+            print("En attente de connexion")
+            time.sleep(5)
 
 
 def executesql(fichier_sql):
@@ -125,14 +137,14 @@ def create_movie_genre_df():
 
 def insert_sql_movie_genre(row):
     try:
-        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
+        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host,port=port) as conn:
             with conn.cursor() as cur:
                 insert_query = """INSERT INTO movie_genre ( movieid, genreid)
                                   VALUES (%s, %s);"""
                 cur.execute(
                     insert_query, (int(row["movieId"]), int(row['genreId'])))
-    except Exception:
-        print(
+    except Exception as e:
+        print(f"{e}",
             (
                 int(row["movieId"]),
                 int(row['genreId'])
@@ -152,7 +164,7 @@ def refresh_table_recap_view():
     except Exception as e:
         print("Error for refresh Table Recap {e}")
 
-
+wait_database_connexion()
 print("execute_all_sql")
 execute_all_sql(sql_file)
 print("insert_sql_movie")
