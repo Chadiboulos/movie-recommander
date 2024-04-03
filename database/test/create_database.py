@@ -173,11 +173,15 @@ def insert_fake_imdb_data(movie):
         except Exception as e:
             print("Error for refresh Table Recap {e}")
 
-
+print("Creation de base des table")
 execute_all_sql(sql_file)
+print("insertion des films")
 movie.apply(insert_sql_movie, axis=1)
+print("insertion des note")
 rating.apply(insert_sql_rating, axis=1)
 movie_genres = create_movie_genre_df()
+print("insertion des movie_genre")
 movie_genres.apply(insert_sql_movie_genre, axis=1)
 refresh_table_recap_view()
+print("insertion des imdb")
 insert_fake_imdb_data(movie)
