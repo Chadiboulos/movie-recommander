@@ -20,7 +20,6 @@ jobs:
       DBNAME: ${{ secrets.DBNAME }}
       USER: ${{ secrets.USER }}
       PASSWORD: ${{ secrets.PASSWORD }}
-      HOST: ${{ secrets.HOST }}
       PORT: ${{ secrets.PORT }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       ALGORITHM: ${{ secrets.ALGORITHM }}
@@ -38,7 +37,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade setuptools wheel
         if [ -f ./src/api/requirements.txt ]; then pip install -r ./src/api/requirements.txt; fi
-
+        - name: Lancer base de donnée local
+        uses: hoverkraft-tech/compose-action@v1.5.1
+        with:
+          compose-file: "./database/test/docker-compose.yaml"
+        env:
+          POSTGRES_USER: ${{ secrets.USER }} 
+          POSTGRES_PW: ${{ secrets.PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DBNAME }}
+    - name : Insert data
+      run: |
+          python3 ./database/test/create_database.py
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
