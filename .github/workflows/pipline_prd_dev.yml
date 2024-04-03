@@ -104,6 +104,15 @@ jobs:
         context: ./streamlit
         file: ./streamlit/Dockerfile
     
+    - name: Build and Push Docker Image Job initdb
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: recofilmsmlopsoct2023/movieflix-initdb:latest
+        platforms: linux/amd64,linux/arm64
+        context: ./database/application
+        file: ./database/applicationDockerfile 
+  
     - name: CD Checkout helm repository
       uses: actions/checkout@v2
       with:
@@ -118,7 +127,8 @@ jobs:
         if [ $BRANCH_NAME == developpement ]; then ENVDIR=DEV; fi
         echo "$BRANCH_NAME -- $ENVDIR"
         if [ -n $ENVDIR ]; then
-          sed -i 's/^  tag:.*/  tag: ${{ env.SHA_ID }}/g' helm_repo/$ENVDIR/values.yaml;
+          sed -i 's/^  tag:.*/  tag: ${{ env.SHA_ID }}/g' helm_repo/$ENVDIR/APPLICATION/values.yaml;
+          sed -i 's/^  tag:.*/  tag: ${{ env.SHA_ID }}/g' helm_repo/$ENVDIR/AIRFLOW/values.yaml;
         fi
 
     - name: CD Commit and Push Helm Repo
