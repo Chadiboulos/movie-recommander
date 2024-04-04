@@ -170,7 +170,7 @@ def load_model_from_mlflow_runid(run_id):
 
 def load_model_saved():
     with engine.connect() as connection:
-        statement = """select mlflow_run_id
+        statement = """select mlflow_run_id 
                       from model_prediction
                       where end_date is null;"""
         modele_predict_row = connection.execute(text(statement))
