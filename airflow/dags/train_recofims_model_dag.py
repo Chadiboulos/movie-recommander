@@ -174,7 +174,8 @@ def load_model_saved():
                       from model_prediction
                       where end_date is null;"""
         modele_predict_row = connection.execute(text(statement))
-        if len(modele_predict_row ) != 0:
+        modeles_row = [row[0] for row in modele_predict_row]
+        if len(modeles_row) != 0:
             mlflow_run_id = modele_predict_row.first()[0]
             modele = load_model_from_mlflow_runid(mlflow_run_id)
 
