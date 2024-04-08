@@ -97,7 +97,7 @@ def create_dataset(task_instance):
                     r.rating
                     from rating r
                     order by r."timestamp"
-                    limit 1000000;"""
+                    limit 50000;"""
 
     with engine.connect() as connection:
         result = connection.execute(text(sql_rating)).all()
