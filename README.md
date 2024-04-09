@@ -10,8 +10,6 @@ L'interface client repose sur un Streamlit qui lui-même dépend d'une API conte
 
 En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible <a href="https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm">ici</a>
 
-ici: https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm
-
 Nous avons visé plusieurs objectifs avec notre architecture:
  - <ins>**High Availability**</ins>: assurer une haute disponibilité à notre service en le déployant avec Kubernetes
  - <ins>**Continuous Training**</ins>: offrir à nos clients, à tout moment la version la plus performante de notre algorithme via Airflow et mlflow
