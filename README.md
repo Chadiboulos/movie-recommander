@@ -7,6 +7,7 @@ Le service livré consiste en des recommandations personnalisées et intelligent
 Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recommandations basées sur une liste de critères tels que le genre, la décennie de sortie, le réalisateur etc.
 
 
+![Screenshot](https://github.com/Chadiboulos/movie-recommander/blob/main/notebooks/Screenshot%202024-04-09%20at%2014.29.18.png?raw=true)
 
 
 ## Organisation du Projet
