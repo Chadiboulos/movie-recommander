@@ -170,17 +170,20 @@ def load_model_from_mlflow_runid(run_id):
 
 def load_model_saved():
     with engine.connect() as connection:
-        statement = """select mlflow_run_id 
-                      from model_prediction
-                      where end_date is null;"""
-        modele_predict_row = connection.execute(text(statement))
-        modeles_row = [row[0] for row in modele_predict_row]
-        if len(modeles_row) != 0:
-            mlflow_run_id = modele_predict_row.first()[0]
+        statement = """
+                    SELECT mlflow_run_id 
+                    FROM model_prediction
+                    WHERE end_date IS NULL;
+                    """
+        result = connection.execute(text(statement))
+        rows = result.fetchall()
+        
+        if rows: 
+            mlflow_run_id = rows[0][0] 
             modele = load_model_from_mlflow_runid(mlflow_run_id)
-
         else:
-            modele =  None
+            modele = None
+            
     return modele
 
 def best_model_runid(task_instance, **kwargs):

@@ -135,7 +135,7 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         repository: ./helm_repo
-        commit_message: 'CD tag ${{ env.SHA_ID }} pour l environnement de  ${{ env.ENV_DIR }}'  # Votre message de commit
+        commit_message: 'CD tag ${{ env.SHA_ID }} sur la branch  ${{ env.BRANCH_NAME }}'
         branch: 'main'
       env:
         GITHUB_TOKEN: ${{ secrets.GITOKEN }}  # Utilisez le même token pour l'authentification
