@@ -8,7 +8,9 @@ Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recomm
 
 L'interface client repose sur un Streamlit qui lui-même dépend d'une API contenant une multitude d'endpoints.
 
-En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible ici: https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm
+En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible <a href="https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm">ici</a>
+
+ici: https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm
 
 Nous avons visé plusieurs objectifs avec notre architecture:
  - <ins>**High Availability**</ins>: assurer une haute disponibilité à notre service en le déployant avec Kubernetes
