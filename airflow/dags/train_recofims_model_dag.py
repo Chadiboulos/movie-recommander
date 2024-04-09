@@ -202,7 +202,7 @@ def best_model_runid(task_instance, **kwargs):
 
 
 def get_modele_prediction_from(run_id):
-    experiment = mlflow.get_experiment_by_name("surprise_recofilms")
+    experiment = mlflow.get_experiment_by_name(experiment_name)
     experiment_id = experiment.experiment_id
     runs = mlflow.search_runs([experiment_id])
     model_data = runs[runs.run_id == run_id]
