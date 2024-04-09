@@ -211,7 +211,7 @@ def get_modele_prediction_from(run_id):
                            params=str(model_data.filter(
                                regex='params.*').to_json(orient='records')),
                            mlflow_run_id=model_data['run_id'].iloc[0],
-                           mlflow_experiment_name="surprise_recofilms",
+                           mlflow_experiment_name=experiment_name,
                            start_date=datetime.now(),
                            end_date=None
                            )

@@ -75,9 +75,10 @@ async def _startup():
 def load_model():
     try:
         model = load_mlflow_model()
+
         return model
     except Exception as e:
-        print(f"Probleme de chargement du modèle mlflow:{e}")
+        print(f"Probleme de chargement du modèle mlflow: {e}")
 
     dir_path = os.path.dirname(__file__)
     with open(os.path.join(dir_path, "svd_model.pkl"), "rb") as f:
