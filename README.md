@@ -7,6 +7,8 @@ Le service livré consiste en des recommandations personnalisées et intelligent
 Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recommandations basées sur une liste de critères tels que le genre, la décennie de sortie, le réalisateur etc.
 
 
+
+
 ## Organisation du Projet
 
 ```
