@@ -1,6 +1,9 @@
 # MovieFlix
 
-Ce projet est destiné aux projets MLOps basés sur le sujet "movie_recommendation".  
+Ce répertoire est dédié au projet de fin de notre formation MLOps.
+Le service livré consiste en des recommandations personnalisées et intelligentes de films en fonction de l'historique de notations des clients.
+Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recommandations basées sur une liste de critères tels que le genre, la décennie de sortie, le réalisateur etc.
+
 
 ## Organisation du Projet
 
