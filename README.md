@@ -13,9 +13,9 @@ En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disp
 Nous avons visé plusieurs objectifs avec notre architecture:
  - **_High Availability_**: assurer une haute disponibilité à notre service en le déployant avec Kubernetes
  - _**Continuous Training**_: offrir à nos clients, à tout moment la version la plus performante de notre algorithme via Airflow et mlflow
- - **Continuous Integration**: mettre entre les mains de nos clients la version fonctionnelle la plus récente de notre code intégrant les films les plus récents via Git Workflow/pytest et du webscraping (Beautiful Soup)
- - **Continuous Deployment**: faire en sorte que toute modification du code ou toute évolution souhaitée de l'architecture se reflète automatiquement sur le déploiement actuel via Kubernetes (argoCD et Helm)
- - **Continuous Monitoring**: suivre de façon continue l'activité de notre API via Grafana et Prometheus
+ - _**Continuous Integration**_: mettre entre les mains de nos clients la version fonctionnelle la plus récente de notre code intégrant les films les plus récents via Git Workflow/pytest et du webscraping (Beautiful Soup)
+ - _**Continuous Deployment**_: faire en sorte que toute modification du code ou toute évolution souhaitée de l'architecture se reflète automatiquement sur le déploiement actuel via Kubernetes (argoCD et Helm)
+ - _**Continuous Monitoring**_: suivre de façon continue l'activité de notre API via Grafana et Prometheus
 
 ![Screenshot](https://github.com/Chadiboulos/movie-recommander/blob/main/notebooks/Architecture.png?raw=true)
 
