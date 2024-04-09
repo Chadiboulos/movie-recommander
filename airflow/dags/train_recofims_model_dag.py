@@ -102,10 +102,10 @@ def create_dataset(task_instance):
     with engine.connect() as connection:
         result = connection.execute(text(sql_rating)).all()
     df = pd.DataFrame(result)
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file = "/temp/model/dataset.csv"
     df.to_csv(temp_file)
-    task_instance.xcom_push(key='dataset_path', value=temp_file.name)
-    print("le dataset est enregistré au chemin: "+temp_file.name)
+    task_instance.xcom_push(key='dataset_path', value=temp_file)
+    print("le dataset est enregistré au chemin: "+temp_file)
     engine.dispose()
 
 
@@ -152,11 +152,11 @@ def train_model(task_instance, **kwargs):
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("mae", mae)
 
-        with tempfile.NamedTemporaryFile() as temp_file:
-            print("Sauvegarde du modele localisé au: ", temp_file.name)
-            with open(temp_file.name, "wb") as f:
-                pickle.dump(best_estimator, f)
-            mlflow.log_artifact(temp_file.name, "model")
+        temp_file = "/temp/model/model.pkl"
+        print("Sauvegarde du modele localisé au: ", temp_file)
+        with open(temp_file, "wb") as f:
+            pickle.dump(best_estimator, f)
+        mlflow.log_artifact(temp_file, "model")
 
 
 def load_model_from_mlflow_runid(run_id):
