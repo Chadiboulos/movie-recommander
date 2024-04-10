@@ -1,6 +1,24 @@
 # MovieFlix
 
-Ce projet est destiné aux projets MLOps basés sur le sujet "movie_recommendation".  
+Ce répertoire est dédié au projet de fin de notre formation MLOps.
+
+Le service livré consiste en des recommandations personnalisées et intelligentes de films en fonction de l'historique de notations des clients.
+
+Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recommandations basées sur une liste de critères tels que le genre, la décennie de sortie, le réalisateur etc.
+
+L'interface client repose sur un Streamlit qui lui-même dépend d'une API dockerisée contenant une multitude d'endpoints.
+
+En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible <a href="https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm">ici</a>
+
+Nous avons visé plusieurs objectifs avec notre architecture:
+ - <ins>**High Availability**</ins>: assurer une haute disponibilité à notre service en le déployant avec Kubernetes
+ - <ins>**Continuous Training**</ins>: offrir à nos clients, à tout moment la version la plus performante de notre algorithme via Airflow et mlflow
+ - <ins>**Continuous Integration**</ins>: mettre entre les mains de nos clients la version fonctionnelle la plus récente de notre code intégrant les films les plus récents via Git Workflow/pytest et du webscraping (Beautiful Soup)
+ - <ins>**Continuous Deployment**</ins>: faire en sorte que toute modification du code ou toute évolution souhaitée de l'architecture se reflète automatiquement sur le déploiement actuel via Kubernetes (argoCD et Helm)
+ - <ins>**Continuous Monitoring**</ins>: suivre de façon continue l'activité de notre API via Grafana et Prometheus
+
+![Screenshot](https://github.com/Chadiboulos/movie-recommander/blob/main/notebooks/Architecture.png?raw=true)
+
 
 ## Organisation du Projet
 
