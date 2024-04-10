@@ -6,7 +6,7 @@ Le service livré consiste en des recommandations personnalisées et intelligent
 
 Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recommandations basées sur une liste de critères tels que le genre, la décennie de sortie, le réalisateur etc.
 
-L'interface client repose sur un Streamlit qui lui-même dépend d'une API contenant une multitude d'endpoints.
+L'interface client repose sur un Streamlit qui lui-même dépend d'une API dockerisée contenant une multitude d'endpoints.
 
 En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible <a href="https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm">ici</a>
 
