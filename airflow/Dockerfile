@@ -3,7 +3,7 @@ FROM apache/airflow:2.8.2
 USER root
 
 COPY --chown=airflow:root ./dags/* /opt/airflow/dags
-
+RUN mkdir /mlflow && chown -R airflow:root /mlflow && chmod -R 777 /mlflow
 
 WORKDIR /opt/airflow/dags
 
@@ -13,6 +13,6 @@ USER airflow
 
 RUN mkdir -p /opt/airflow/temp/model
 
-RUN mkdir /mlflow
+
 
 RUN pip install --upgrade pip && pip install --upgrade setuptools wheel && pip install -r requirements.txt
