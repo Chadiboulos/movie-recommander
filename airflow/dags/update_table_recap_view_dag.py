@@ -9,7 +9,7 @@ update_table_recap_view_dag = DAG(
     description='DAG permettant de mettre\
         à jour la vue materialiser "table_recap_view"',
     tags=['recofilms'],
-    schedule_interval=timedelta(hours=1),
+    schedule_interval=timedelta(minutes=30),
     catchup=False,
     default_args={
         'owner': 'airflow',
