@@ -74,7 +74,8 @@ async def _startup():
 
 def load_model():
     try:
-        model = load_mlflow_model()
+        runid,model = load_mlflow_model()
+        print(f"Le chargement du modèle mlflow {runid}, s'est effectuer correctement")
 
         return model
     except Exception as e:
@@ -83,6 +84,7 @@ def load_model():
     dir_path = os.path.dirname(__file__)
     with open(os.path.join(dir_path, "svd_model.pkl"), "rb") as f:
         model = pickle.load(f)
+    
     return model
 
 

@@ -29,6 +29,6 @@ def load_mlflow_model():
     result = list(cursor.fetchall())
     if len(result) != 0:
         mlflow_run_id = result[0][0]
-        return load_model_from_mlflow_runid(mlflow_run_id)
+        return mlflow_run_id,load_model_from_mlflow_runid(mlflow_run_id)
     else: raise Exception("Any model is available in the table 'model_prediction'.")
 
