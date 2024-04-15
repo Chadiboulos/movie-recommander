@@ -156,7 +156,12 @@ def train_model(task_instance, **kwargs):
         print("Sauvegarde du modele localisé au: ", temp_file)
         with open(temp_file, "wb") as f:
             pickle.dump(best_estimator, f)
-        mlflow.log_artifact(temp_file, "model")
+        try:
+            mlflow.log_artifact(temp_file, "model")
+            print("Artéfact logué avec succès.")
+        except Exception as e:
+            print(f"Erreur lors de la tentative de log de l'artéfact : {e}")
+        print("Sauvegarde du modele localisé au: ", temp_file)
 
 
 def load_model_from_mlflow_runid(run_id):
