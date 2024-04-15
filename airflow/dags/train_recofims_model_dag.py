@@ -135,7 +135,8 @@ def train_model(task_instance, **kwargs):
                   'lr_all': [0.001, 0.005, 0.02],
                   'reg_all': [0.005, 0.02]}
     context = kwargs
-
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     with mlflow.start_run():
         mlflow.set_tag("type_model", "Surprise_SVD")
         mlflow.set_tag("airflow_dag_run_id", context['dag_run'].run_id)
@@ -165,6 +166,8 @@ def train_model(task_instance, **kwargs):
 
 
 def load_model_from_mlflow_runid(run_id):
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     model_path = mlflow.artifacts.download_artifacts(run_id=run_id)
     model_path = os.path.join(model_path, "model")
     model_name = os.listdir(model_path)[0]
@@ -182,17 +185,19 @@ def load_model_saved():
                     """
         result = connection.execute(text(statement))
         rows = result.fetchall()
-        
-        if rows: 
-            mlflow_run_id = rows[0][0] 
+
+        if rows:
+            mlflow_run_id = rows[0][0]
             modele = load_model_from_mlflow_runid(mlflow_run_id)
         else:
             modele = None
-            
+
     return modele
 
-def best_model_runid(task_instance, **kwargs):
 
+def best_model_runid(task_instance, **kwargs):
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     context = kwargs
     experiment = mlflow.get_experiment_by_name(experiment_name)
     experiment_id = experiment.experiment_id
@@ -210,6 +215,8 @@ def best_model_runid(task_instance, **kwargs):
 
 
 def get_modele_prediction_from(run_id):
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     experiment = mlflow.get_experiment_by_name(experiment_name)
     experiment_id = experiment.experiment_id
     runs = mlflow.search_runs([experiment_id])
