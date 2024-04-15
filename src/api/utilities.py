@@ -366,7 +366,7 @@ def movie_details(movieid: int):
                    imdb_data.certificat,
                    imdb_data.writers,
                    imdb_data.poster
-                   FROM table_recap_view JOIN imdb_data
+                   FROM table_recap_view left outer JOIN imdb_data
                    ON imdb_data.movieid = table_recap_view.movieid
                    WHERE table_recap_view.movieid=%s"""
         cursor.execute(query, [movieid])
