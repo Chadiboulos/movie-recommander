@@ -23,8 +23,7 @@ CREATE TABLE imdb_data (
 	directors varchar(500) NULL,
 	writers varchar(500) NULL,
 	stars varchar(500) NULL,
-	CONSTRAINT imdb_data_pkey PRIMARY KEY (movieid),
-	CONSTRAINT imdb_data_movieid_fkey FOREIGN KEY (movieid) REFERENCES movie(movieid)
+	CONSTRAINT imdb_data_pkey PRIMARY KEY (movieid)
 );
 CREATE INDEX movie_decade_idx ON movie USING btree (decade);
 CREATE INDEX movie_year_idx ON movie USING btree (year);
