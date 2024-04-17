@@ -130,10 +130,10 @@ def train_test_from_dateset_path(dataset_path: str):
 def train_model(task_instance, **kwargs):
     dataset_path = task_instance.xcom_pull(key="dataset_path")
     trainset, testset = train_test_from_dateset_path(dataset_path)
-    param_grid = {'n_factors': [10],
-                  'n_epochs': [20, 50],
-                  'lr_all': [0.001, 0.005, 0.02],
-                  'reg_all': [0.005, 0.02]}
+    param_grid = {'n_factors': [5,10,20,50,],
+                  'n_epochs': [20, 50,60],
+                  'lr_all': [0.001, 0.005, 0.02, 0.10],
+                  'reg_all': [0.005, 0.02,0.10]}
     context = kwargs
     mlflow.set_tracking_uri(mlflowserver)
     mlflow.set_experiment(experiment_name)
