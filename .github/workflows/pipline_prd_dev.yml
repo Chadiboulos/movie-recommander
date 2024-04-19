@@ -127,8 +127,8 @@ jobs:
         if [ $BRANCH_NAME == developpement ]; then ENVDIR=DEV; fi
         echo "$BRANCH_NAME -- $ENVDIR"
         if [ -n $ENVDIR ]; then
-          sed -i 's/^  tag:.*/  tag: ${{ env.SHA_ID }}/g' helm_repo/$ENVDIR/APPLICATION/values.yaml;
-          sed -i 's/^    tag:.*/    tag: ${{ env.SHA_ID }}/g' helm_repo/$ENVDIR/AIRFLOW/values.yaml;
+          sed -i 's/^  tag:.*/  tag: \"${{ env.SHA_ID }}\"/g' helm_repo/$ENVDIR/APPLICATION/values.yaml;
+          sed -i 's/^    tag:.*/    tag: \"${{ env.SHA_ID }}\"/g' helm_repo/$ENVDIR/AIRFLOW/values.yaml;
         fi
 
     - name: CD Commit and Push Helm Repo
