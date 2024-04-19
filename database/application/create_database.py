@@ -14,11 +14,12 @@ port = int(os.environ.get("POSTGRES_PORT"))
 print(datetime.datetime.now())
 sql_file = sorted(glob.glob("./sql/*"))
 
+
 def wait_database_connexion():
-    while(True):
+    while (True):
         try:
             conn = psycopg2.connect(dbname=dbname, user=user,
-                            password=password, host=host, port=port)
+                                    password=password, host=host, port=port)
             print("Connextion !!!")
             return 0
         except Exception as e:
@@ -55,9 +56,10 @@ def execute_all_sql(sql_file):
         executesql(file)
 
 
-rating = pd.read_csv("./ml-latest-small/ratings.csv")
-movie = pd.read_csv("./ml-latest-small/movies.csv")
-link = pd.read_csv("./ml-latest-small/links.csv")
+rating = pd.read_csv("./data/ratings.csv")
+movie = pd.read_csv("./data/movies.csv")
+link = pd.read_csv("./data/links.csv")
+imdb = pd.read_csv("./data/imdb_data.csv")
 
 
 movie = movie.merge(link, on="movieId")
@@ -137,7 +139,7 @@ def create_movie_genre_df():
 
 def insert_sql_movie_genre(row):
     try:
-        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host,port=port) as conn:
+        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port) as conn:
             with conn.cursor() as cur:
                 insert_query = """INSERT INTO movie_genre ( movieid, genreid)
                                   VALUES (%s, %s);"""
@@ -145,13 +147,40 @@ def insert_sql_movie_genre(row):
                     insert_query, (int(row["movieId"]), int(row['genreId'])))
     except Exception as e:
         print(f"{e}",
-            (
-                int(row["movieId"]),
-                int(row['genreId'])
-            )
-        )
+              (
+                  int(row["movieId"]),
+                  int(row['genreId'])
+              )
+              )
         return 1
     return 0
+
+
+def insert_sql_imdb(row):
+    try:
+        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
+            with conn.cursor() as cur:
+                insert_query = """INSERT INTO movie_genre ( movieid,
+                                                            titre,
+                                                            summary,
+                                                            certificat,
+                                                            duration,
+                                                            poster,
+                                                            directors,
+                                                            writers,
+                                                            stars)
+                                  VALUES (%s, %s,%s, %s,%s, %s,%s, %s,%s);"""
+                cur.execute(insert_query, (int(row["movieId"]),
+                                           row["titre"],
+                                           row["summary"],
+                                           row["certificat"],
+                                           row["duration"],
+                                           row["poster"],
+                                           row["directors"],
+                                           row["writers"],
+                                           row["stars"]))
+    except Exception as e:
+        print(f"Error  {e}")
 
 
 def refresh_table_recap_view():
@@ -164,6 +193,7 @@ def refresh_table_recap_view():
     except Exception as e:
         print("Error for refresh Table Recap {e}")
 
+
 wait_database_connexion()
 print("execute_all_sql")
 execute_all_sql(sql_file)
@@ -174,6 +204,10 @@ rating.apply(insert_sql_rating, axis=1)
 movie_genres = create_movie_genre_df()
 print("insert_sql_movie_genre")
 movie_genres.apply(insert_sql_movie_genre, axis=1)
+print("insert imdb data")
+imdb.apply(insert_sql_imdb,axis=1)
 print("refresh_table_recap_view")
 refresh_table_recap_view()
+print("Terminer !!!")
 print(datetime.datetime.now())
+
