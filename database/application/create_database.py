@@ -170,7 +170,7 @@ def insert_sql_imdb(row):
                                                             writers,
                                                             stars)
                                   VALUES (%s, %s,%s, %s,%s, %s,%s, %s,%s);"""
-                cur.execute(insert_query, (int(row["movieId"]),
+                cur.execute(insert_query, (int(row["movieid"]),
                                            row["titre"],
                                            row["summary"],
                                            row["certificat"],
@@ -180,7 +180,7 @@ def insert_sql_imdb(row):
                                            row["writers"],
                                            row["stars"]))
     except Exception as e:
-        print(f"Error  {e}")
+        print(f"Error:  {e}")
 
 
 def refresh_table_recap_view():
