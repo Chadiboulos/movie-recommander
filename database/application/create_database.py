@@ -158,7 +158,7 @@ def insert_sql_movie_genre(row):
 
 def insert_sql_imdb(row):
     try:
-        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
+        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port) as conn:
             with conn.cursor() as cur:
                 insert_query = """INSERT INTO movie_genre ( movieid,
                                                             titre,
