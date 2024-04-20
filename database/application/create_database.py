@@ -160,7 +160,7 @@ def insert_sql_imdb(row):
     try:
         with psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port) as conn:
             with conn.cursor() as cur:
-                insert_query = """INSERT INTO movie_genre ( movieid,
+                insert_query = """INSERT INTO imdb_data ( movieid,
                                                             titre,
                                                             summary,
                                                             certificat,
@@ -181,6 +181,8 @@ def insert_sql_imdb(row):
                                            row["stars"]))
     except Exception as e:
         print(f"Error:  {e}")
+        return 0
+    return 1
 
 
 def refresh_table_recap_view():
