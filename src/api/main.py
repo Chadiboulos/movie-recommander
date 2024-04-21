@@ -74,8 +74,9 @@ async def _startup():
 
 def load_model():
     try:
-        runid,model = load_mlflow_model()
-        print(f"Le chargement du modèle mlflow {runid}, s'est effectuer correctement")
+        runid, model = load_mlflow_model()
+        print(
+            f"Le chargement du modèle mlflow {runid}, s'est effectué correctement")
 
         return model
     except Exception as e:
@@ -84,7 +85,7 @@ def load_model():
     dir_path = os.path.dirname(__file__)
     with open(os.path.join(dir_path, "svd_model.pkl"), "rb") as f:
         model = pickle.load(f)
-    
+
     return model
 
 
@@ -98,7 +99,7 @@ movies_df_cleaned = movies_df.assign(
                                                      regex=True))
 
 title_to_movieid = dict(zip(movies_df_cleaned['title'],
-                            movies_df['movieid' ]))
+                            movies_df['movieid']))
 cleaned_to_initial_title = dict(
     zip(movies_df_cleaned['title'],
         movies_df['title']))
@@ -123,7 +124,7 @@ def get_api_status():
     Returns ok if API is functional
     """
     return {"status": "OK",
-            "version":sha_id}
+            "version": sha_id}
 
 
 # Route for generating access token
