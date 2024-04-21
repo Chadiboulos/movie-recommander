@@ -355,7 +355,7 @@ def movie_details(movieid: int):
         conn = psycopg2.connect(**db_params)
         cursor = conn.cursor()
 
-        query = """SELECT table_recap_view.title ,
+        query = """SELECT movie.title ,
                    table_recap_view.avg_rating,
                    table_recap_view.nb_rating,
                    table_recap_view.genre,
@@ -368,12 +368,14 @@ def movie_details(movieid: int):
                    imdb_data.poster
                    FROM table_recap_view left outer JOIN imdb_data
                    ON imdb_data.movieid = table_recap_view.movieid
-                   WHERE table_recap_view.movieid=%s"""
+                   right outer join movie on movie.movieid = table_recap_view.movieid
+                   WHERE movie.movieid=%s"""
         cursor.execute(query, [movieid])
         rows = cursor.fetchall()
         row = rows[0]
     except Exception as e:
         print(f"An error occurred while fetching the movie: {e}")
+        r
     if len(rows) == 0:
         return []
     movie_details = [(desc[0], row[i])
