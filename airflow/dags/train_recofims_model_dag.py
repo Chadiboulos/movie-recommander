@@ -97,15 +97,15 @@ def create_dataset(task_instance):
                     r.rating
                     from rating r
                     order by r."timestamp"
-                    limit 1000000;"""
+                    limit 50000;"""
 
     with engine.connect() as connection:
         result = connection.execute(text(sql_rating)).all()
     df = pd.DataFrame(result)
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file = "/opt/airflow/temp/model/dataset.csv"
     df.to_csv(temp_file)
-    task_instance.xcom_push(key='dataset_path', value=temp_file.name)
-    print("le dataset est enregistré au chemin: "+temp_file.name)
+    task_instance.xcom_push(key='dataset_path', value=temp_file)
+    print("le dataset est enregistré au chemin: "+temp_file)
     engine.dispose()
 
 
@@ -130,12 +130,13 @@ def train_test_from_dateset_path(dataset_path: str):
 def train_model(task_instance, **kwargs):
     dataset_path = task_instance.xcom_pull(key="dataset_path")
     trainset, testset = train_test_from_dateset_path(dataset_path)
-    param_grid = {'n_factors': [10],
-                  'n_epochs': [20, 50],
-                  'lr_all': [0.001, 0.005, 0.02],
-                  'reg_all': [0.005, 0.02]}
+    param_grid = {'n_factors': [5,10,20,50,],
+                  'n_epochs': [20, 50,60],
+                  'lr_all': [0.001, 0.005, 0.02, 0.10],
+                  'reg_all': [0.005, 0.02,0.10]}
     context = kwargs
-
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     with mlflow.start_run():
         mlflow.set_tag("type_model", "Surprise_SVD")
         mlflow.set_tag("airflow_dag_run_id", context['dag_run'].run_id)
@@ -152,14 +153,21 @@ def train_model(task_instance, **kwargs):
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("mae", mae)
 
-        with tempfile.NamedTemporaryFile() as temp_file:
-            print("Sauvegarde du modele localisé au: ", temp_file.name)
-            with open(temp_file.name, "wb") as f:
-                pickle.dump(best_estimator, f)
-            mlflow.log_artifact(temp_file.name, "model")
+        temp_file = "/opt/airflow/temp/model/model.pkl"
+        print("Sauvegarde du modele localisé au: ", temp_file)
+        with open(temp_file, "wb") as f:
+            pickle.dump(best_estimator, f)
+        try:
+            mlflow.log_artifact(temp_file, "model")
+            print("Artéfact logué avec succès.")
+        except Exception as e:
+            print(f"Erreur lors de la tentative de log de l'artéfact : {e}")
+        print("Sauvegarde du modele localisé au: ", temp_file)
 
 
 def load_model_from_mlflow_runid(run_id):
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     model_path = mlflow.artifacts.download_artifacts(run_id=run_id)
     model_path = os.path.join(model_path, "model")
     model_name = os.listdir(model_path)[0]
@@ -170,15 +178,26 @@ def load_model_from_mlflow_runid(run_id):
 
 def load_model_saved():
     with engine.connect() as connection:
-        statement = """select mlflow_run_id
-                      from model_prediction
-                      where end_date is null;"""
-        mlflow_run_id = connection.execute(text(statement)).first()[0]
-    return load_model_from_mlflow_runid(mlflow_run_id)
+        statement = """
+                    SELECT mlflow_run_id 
+                    FROM model_prediction
+                    WHERE end_date IS NULL;
+                    """
+        result = connection.execute(text(statement))
+        rows = result.fetchall()
+
+        if rows:
+            mlflow_run_id = rows[0][0]
+            modele = load_model_from_mlflow_runid(mlflow_run_id)
+        else:
+            modele = None
+
+    return modele
 
 
 def best_model_runid(task_instance, **kwargs):
-
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
     context = kwargs
     experiment = mlflow.get_experiment_by_name(experiment_name)
     experiment_id = experiment.experiment_id
@@ -196,7 +215,9 @@ def best_model_runid(task_instance, **kwargs):
 
 
 def get_modele_prediction_from(run_id):
-    experiment = mlflow.get_experiment_by_name("surprise_recofilms")
+    mlflow.set_tracking_uri(mlflowserver)
+    mlflow.set_experiment(experiment_name)
+    experiment = mlflow.get_experiment_by_name(experiment_name)
     experiment_id = experiment.experiment_id
     runs = mlflow.search_runs([experiment_id])
     model_data = runs[runs.run_id == run_id]
@@ -205,7 +226,7 @@ def get_modele_prediction_from(run_id):
                            params=str(model_data.filter(
                                regex='params.*').to_json(orient='records')),
                            mlflow_run_id=model_data['run_id'].iloc[0],
-                           mlflow_experiment_name="surprise_recofilms",
+                           mlflow_experiment_name=experiment_name,
                            start_date=datetime.now(),
                            end_date=None
                            )
@@ -221,30 +242,35 @@ def comparer_choisir_model(task_instance):
     run_id = task_instance.xcom_pull(key="best_model_run_id")
     best_model = load_model_from_mlflow_runid(run_id)
     model_in_prod = load_model_saved()
-
-    predict_best_model = best_model.test(testset)
-    predict_model_saved = model_in_prod.test(testset)
-    rmse_best_model = accuracy.rmse(predict_best_model)
-    rmse_model_prod = accuracy.rmse(predict_model_saved)
-
-    if rmse_best_model < rmse_model_prod:
-        with engine.connect() as connect:
-            q_id_model = """select modelid
-                            from model_prediction mp
-                            where mp.end_date is null ;"""
-            mp_id = connect.execute(text(q_id_model)).first()[0]
-
+    if model_in_prod is None:
         mp = get_modele_prediction_from(run_id)
         insert = generer_requete_insert_model_prediction(mp)
         with engine.connect() as connect:
             connect.execute(text(insert))
+    else:
+        predict_best_model = best_model.test(testset)
+        predict_model_saved = model_in_prod.test(testset)
+        rmse_best_model = accuracy.rmse(predict_best_model)
+        rmse_model_prod = accuracy.rmse(predict_model_saved)
 
-        with engine.connect() as connect:
-            update = f"""update model_prediction
-                         set end_date = CURRENT_TIMESTAMP
-                         where modelid = {mp_id};"""
-            connect.execute(text(update))
-        print("Nouveau modèle!!!!!")
+        if rmse_best_model < rmse_model_prod:
+            with engine.connect() as connect:
+                q_id_model = """select modelid
+                                from model_prediction mp
+                                where mp.end_date is null ;"""
+                mp_id = connect.execute(text(q_id_model)).first()[0]
+
+            mp = get_modele_prediction_from(run_id)
+            insert = generer_requete_insert_model_prediction(mp)
+            with engine.connect() as connect:
+                connect.execute(text(insert))
+
+            with engine.connect() as connect:
+                update = f"""update model_prediction
+                            set end_date = CURRENT_TIMESTAMP
+                            where modelid = {mp_id};"""
+                connect.execute(text(update))
+            print("Nouveau modèle!!!!!")
 
 
 my_task1_init = PythonOperator(

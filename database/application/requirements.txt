@@ -1,0 +1,6 @@
+pandas
+numpy
+psycopg2-binary==2.9.9
+sqlalchemy
+psycopg2-binary
+ 

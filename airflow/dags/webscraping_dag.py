@@ -9,7 +9,7 @@ get_imdb_data_dag = DAG(
     dag_id='webscraping_imdb',
     description='DAG permettant de recuperer les donnée de films sur imdb"',
     tags=['recofilms'],
-    schedule_interval=timedelta(days=1),
+    schedule_interval=timedelta(minutes=20),
     catchup=False,
     default_args={
         'owner': 'airflow',

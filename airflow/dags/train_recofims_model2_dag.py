@@ -13,6 +13,9 @@ from surprise import Reader, Dataset, SVD, accuracy
 from surprise.model_selection import train_test_split, GridSearchCV
 
 
+# Alternative DAG with functionality from Surprise library in "train_model" function and 5 tasks
+
+
 train_modele_prdiction_dag2 = DAG(
     dag_id='train_modele_prediction2',
     description="DAG permettant d'entrainer un modele prédiction",
@@ -24,7 +27,6 @@ train_modele_prdiction_dag2 = DAG(
         'start_date': datetime(year=2024, month=1, day=5)
     }
 )
-
 
 mlflowserver = Variable.get(key="mlflowserver")
 experiment_name = Variable.get(key="experiment_name")
@@ -162,7 +164,7 @@ def load_model_from_mlflow_runid(run_id):
     model = pickle.load(open(model_path, "rb"))
     return model
     
-    
+
 def load_model_saved():
     with engine.connect() as connection:
         statement = """select mlflow_run_id 

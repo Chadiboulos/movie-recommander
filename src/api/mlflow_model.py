@@ -6,7 +6,6 @@ from credentials import db_params
 
 
 mlflowserver = os.environ.get('MLFLOW_SERVER')
-mlflow_modelid = os.environ.get('MLFLOW_MODELID')
 mlflow.set_tracking_uri(mlflowserver)
 
 
@@ -26,8 +25,10 @@ def load_mlflow_model():
                     model_prediction
                     where end_date is null
                     order by start_date desc"""
-    cursor.execute(statement, (mlflow_modelid,))
+    cursor.execute(statement)
     result = list(cursor.fetchall())
-    mlflow_run_id = result[0][0]
+    if len(result) != 0:
+        mlflow_run_id = result[0][0]
+        return mlflow_run_id,load_model_from_mlflow_runid(mlflow_run_id)
+    else: raise Exception("Any model is available in the table 'model_prediction'.")
 
-    return load_model_from_mlflow_runid(mlflow_run_id)
