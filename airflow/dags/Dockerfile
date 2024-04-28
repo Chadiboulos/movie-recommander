@@ -2,7 +2,7 @@ FROM apache/airflow:2.8.2
 
 USER root
 
-COPY --chown=airflow:root ./dags/* /opt/airflow/dags
+COPY --chown=airflow:root ./* /opt/airflow/dags
 
 RUN mkdir /mlflow && chown -R airflow:root /mlflow && chmod -R 777 /mlflow
 
