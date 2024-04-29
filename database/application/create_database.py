@@ -250,5 +250,5 @@ for dag in dagname:
     if response.status_code == 200:
         print("Dag {dag} activé !!!")
     else:
-        print("Probleme a l'activation du dag {dag} !!!")
+        print(f"Probleme a l'activation du dag {dag}: {response.text}")
 
