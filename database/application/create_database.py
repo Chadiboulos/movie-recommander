@@ -248,7 +248,7 @@ for dag in dagname:
     # Send a PATCH request to activate the DAG
     response = requests.patch(endpoint_activate, json=activate_payload, auth=auth)
     if response.status_code == 200:
-        print("Dag {dag} activé !!!")
+        print(f"Dag {dag} activé !!!")
     else:
         print(f"Probleme a l'activation du dag {dag}: {response.text}")
 
