@@ -241,7 +241,7 @@ print(dagname)
 
 for dag in dagname:
     # Endpoint to activate a DAG
-    endpoint_activate = f'{airflow_api_url}/dags/{dag}'
+    endpoint_activate = f'{airflow_api_url}/api/v1/dags/{dag}'
 
     activate_payload = {'is_paused': False}
 
