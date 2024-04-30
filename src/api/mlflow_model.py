@@ -63,6 +63,7 @@ class Model:
             if mlflow_run_id == self.mlflow_run_id: return self.model
             else:
                 self.mlflow_run_id = mlflow_run_id
+                print(f"Nouveau model {mlflow_run_id} !!!")
                 self.model = self.load_model_from_mlflow_runid(self.mlflow_run_id)
                 return self.model
         else: return self.defaut_model
