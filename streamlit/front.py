@@ -17,12 +17,13 @@ def afficher_films(movied: int, predict_rating: float = None):
         pourcent = int((predict_rating/5)*100)
     html = """
     <div style="display:flex;flex-direction:column;align-items:center;padding:10px;">"""
-    if predict_rating is not None:
+    if predict_rating:
         html += f"""<h2>{donnees_film.get('title', '')} {pourcent:}%</h2>"""
     else:
         html += f"""<h2>{donnees_film.get('title', '')}</h2>"""
-    html += f"""<img src="{donnees_film.get('poster', '')}" alt="Poster"\
-          style="width:200px;height:auto;border-radius:10px;box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">"""
+    if donnees_film.get('poster', ''):
+        html += f"""<img src="{donnees_film.get('poster', '')}" alt="Poster"\
+            style="width:200px;height:auto;border-radius:10px;box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">"""
     html += """<div style="margin-top:10px;">"""
     html += f"""<p><strong>Résumé:</strong> {donnees_film.get('summary', '')}</p>
             <p><strong>Note moyenne:</strong> {donnees_film.get('avg_rating', ''):.2f} / 5\
@@ -74,8 +75,6 @@ with st.sidebar:
                 st.session_state.token = connect(username, password)
         except Exception as e:
             st.write(f"Problème d'authentification 😭 {e}")
-        else:
-            st.write("OK 👌🏿")
     if 'token' in st.session_state:
         st.write("Vous êtes connecté 👌🏿")
     else:
@@ -109,9 +108,10 @@ with tab1:
                              unsafe_allow_html=True
                              )
                     st.write("------")
-        except Exception:
+        except Exception as e :
             st.write("Ce service est réservé uniquement aux clients authentifiés. Pour obtenir des\
                       recommandations veuillez saisir vos préférences dans l'onglet 'Recherche'")
+            print(e)
 
 
 def afficher_etoiles(note):
