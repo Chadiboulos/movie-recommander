@@ -37,6 +37,9 @@ class Model:
         self.db_params = db_params
         self.mlflow_run_id = ''
         self.model = None
+        dir_path = os.path.dirname(__file__)
+        with open(os.path.join(dir_path, "svd_model.pkl"), "rb") as f:
+            self.defaut_model = pickle.load(f)
 
     def load_model_from_mlflow_runid(self, run_id: str):
         model_path = mlflow.artifacts.download_artifacts(run_id=run_id)
@@ -57,16 +60,11 @@ class Model:
         result = list(cursor.fetchall())
         if len(result) != 0:
             mlflow_run_id = result[0][0]
-            if mlflow_run_id == self.mlflow_run_id:
-                return self.model
+            if mlflow_run_id == self.mlflow_run_id: return self.model
             else:
                 self.mlflow_run_id = mlflow_run_id
                 self.model = self.load_model_from_mlflow_runid(self.mlflow_run_id)
                 return self.model
-        else:
-            dir_path = os.path.dirname(__file__)
-            with open(os.path.join(dir_path, "svd_model.pkl"), "rb") as f:
-                model = pickle.load(f)
-            return model
+        else: return self.defaut_model
 
 
