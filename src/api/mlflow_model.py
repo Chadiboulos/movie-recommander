@@ -47,7 +47,7 @@ class Model:
         return model
 
     def get_model(self):
-        conn = psycopg2.connect(self.db_params)
+        conn = psycopg2.connect(**self.db_params)
         cursor = conn.cursor()
         statement = """select mlflow_run_id  from
                         model_prediction
