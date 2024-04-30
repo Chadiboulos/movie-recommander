@@ -34,7 +34,7 @@ def load_mlflow_model():
 
 class Model:
     def __init__(self,db_params):
-        self.db_params
+        self.db_params = db_params
         self.mlflow_run_id = ''
         self.model = None
 
