@@ -58,4 +58,4 @@ Nous avons visé plusieurs objectifs avec notre architecture:
 
 ## Installation de l'application
 
-Retrouvez les instructions d'installation de cluster Kubernetes local dans [Movieflix_Helm](https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm).
+Retrouvez les instructions d'installation du cluster Kubernetes local dans [Movieflix_Helm](https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm).
