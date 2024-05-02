@@ -1,14 +1,14 @@
 # MovieFlix
 
-Ce répertoire est dédié au projet de fin de notre formation MLOps.
+Ce répertoire est dédié au projet de fin de notre formation **MLOps**. Application et services associés déploient un système de recommandation de films dans un environnement **Kubernetes local**.
 
-Le service livré consiste en des recommandations personnalisées et intelligentes de films en fonction de l'historique de notations des clients.
+Le service livré consiste en des recommandations personnalisées et intelligentes de films basées sur l'historique de notation des clients.
 
 Ceux qui n'ont pas assez d'historique ou les prospects pourront avoir des recommandations basées sur une liste de critères tels que le genre, la décennie de sortie, le réalisateur etc.
 
 L'interface client repose sur un Streamlit qui lui-même dépend d'une API dockerisée contenant une multitude d'endpoints.
 
-En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible <a href="https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm">ici</a>
+En plus de ce repo, un repo Github dédié à l'architecture kubernetes est disponible ici <a href="https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm">Movieflix_Helm</a>
 
 Nous avons visé plusieurs objectifs avec notre architecture:
  - <ins>**High Availability**</ins>: assurer une haute disponibilité à notre service en le déployant avec Kubernetes
@@ -58,4 +58,4 @@ Nous avons visé plusieurs objectifs avec notre architecture:
 
 ## Installation de l'application
 
-Retrouvez les instructions d'installation sur un cluster Kubernetes sur ce [GitHub](https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm).
+Retrouvez les instructions d'installation sur un cluster Kubernetes sur ce [Movieflix_Helm](https://github.com/Jbdu4493/oct23_cmlops_reco_films_helm).
