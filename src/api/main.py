@@ -91,7 +91,7 @@ def load_model():
 
 # Loading the recommendation model and necessary data
 model_prd = Model(db_params)
-# model = load_model()
+
 ratings_df = fetch_ratings_from_db()
 movies_df = fetch_movie_titles_from_db()
 movies_df_cleaned = movies_df.assign(
