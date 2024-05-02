@@ -27,7 +27,7 @@ from datetime import timedelta, datetime
 from credentials import (ACCESS_TOKEN_EXPIRATION, db_params, pwd_context)
 import os
 from prometheus_fastapi_instrumentator import Instrumentator
-from mlflow_model import load_mlflow_model
+from mlflow_model import load_mlflow_model, Model
 
 
 # Fetching environment variable for environment information
@@ -90,7 +90,8 @@ def load_model():
 
 
 # Loading the recommendation model and necessary data
-model = load_model()
+model_prd = Model(db_params)
+
 ratings_df = fetch_ratings_from_db()
 movies_df = fetch_movie_titles_from_db()
 movies_df_cleaned = movies_df.assign(
@@ -103,8 +104,6 @@ title_to_movieid = dict(zip(movies_df_cleaned['title'],
 cleaned_to_initial_title = dict(
     zip(movies_df_cleaned['title'],
         movies_df['title']))
-
-model = load_model()
 
 
 # Route for the home status page with welcome message
@@ -160,6 +159,8 @@ async def get_recommendations(current_user: tuple = Depends(get_current_user)):
     """
     Generates personalized recommandations for authenticated clients
     """
+    model = model_prd.get_model()
+    
     _, userid, _ = current_user
     try:
 

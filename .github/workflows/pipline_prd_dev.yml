@@ -83,8 +83,8 @@ jobs:
         push: true
         tags: recofilmsmlopsoct2023/airflow:${{ env.SHA_ID }}
         platforms: linux/amd64,linux/arm64
-        context: ./airflow
-        file: ./airflow/Dockerfile
+        context: ./airflow/dags/
+        file: ./airflow/dags/Dockerfile
 
     - name: Build and Push Docker Image API
       uses: docker/build-push-action@v5

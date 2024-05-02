@@ -6,36 +6,49 @@ APIURL = os.environ.get("APIURL", "http://localhost:8001")
 
 
 def afficher_films(movied: int, predict_rating: float = None):
-
-    response = requests.get(url=APIURL+"/movie_details/"+str(movied),
-                            headers={
-        'accept': 'application/json'})
+    response = requests.get(url=APIURL + "/movie_details/" + str(movied), headers={'accept': 'application/json'})
     donnees_film = response.json()
-    if donnees_film == []:
+    
+    if not donnees_film:  # Check for empty list or None
         return ""
-    if predict_rating is not None:
-        pourcent = int((predict_rating/5)*100)
-    html = """
-    <div style="display:flex;flex-direction:column;align-items:center;padding:10px;">"""
-    if predict_rating is not None:
-        html += f"""<h2>{donnees_film.get('title', '')} {pourcent:}%</h2>"""
-    else:
-        html += f"""<h2>{donnees_film.get('title', '')}</h2>"""
-    html += f"""<img src="{donnees_film.get('poster', '')}" alt="Poster"\
-          style="width:200px;height:auto;border-radius:10px;box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">"""
-    html += """<div style="margin-top:10px;">"""
-    html += f"""<p><strong>Résumé:</strong> {donnees_film.get('summary', '')}</p>
-            <p><strong>Note moyenne:</strong> {donnees_film.get('avg_rating', ''):.2f} / 5\
-                  (sur {donnees_film.get('nb_rating', '')} avis)</p>
-            <p><strong>Réalisateurs:</strong> {donnees_film.get('directors', '')}</p>
-            <p><strong>Genre:</strong> {donnees_film.get('genre', '')}</p>
-            <p><strong>Scénaristes:</strong> {donnees_film.get('writers', '')}</p>
-            <p><strong>Acteurs principaux:</strong> {donnees_film.get('stars', '')}</p>
-            <p><strong>Durée:</strong> {donnees_film.get('duration', '')} minutes</p>
-        </div>
-    </div>
+
+    html = "<div style='display:flex;flex-direction:column;align-items:center;padding:10px;'>"
+
+    # Handle predict_rating
+    st.write(f"### ID Movie: {movied}")
+    pourcent = f"{int((predict_rating/5) * 100)}%" if predict_rating is not None else ""
+    title = donnees_film.get('title', 'Unknown Title')
+    html += f"<h2>{title} {pourcent}</h2>"
+
+    # Handle poster
+    poster = donnees_film.get('poster', '')
+    if poster:
+        html += f"<img src='{poster}' alt='Poster' style='width:200px;height:auto;border-radius:10px;box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);'>"
+
+    # Extract and handle None values for all fields
+    summary = donnees_film.get('summary', 'No summary available')
+    avg_rating = donnees_film.get('avg_rating', 0.0) or 0.0  # Ensure a float
+    nb_rating = donnees_film.get('nb_rating', 'No ratings') or 'No ratings'
+    directors = donnees_film.get('directors', 'Unknown') or 'Unknown'
+    genre = donnees_film.get('genre', 'Unknown') or 'Unknown'
+    writers = donnees_film.get('writers', 'Unknown') or 'Unknown'
+    stars = donnees_film.get('stars', 'Unknown') or 'Unknown'
+    duration = donnees_film.get('duration', 'Unknown') if donnees_film.get('duration') else 'Unknown'
+
+    html += f"""<div style='margin-top:10px;'>
+                <p><strong>Résumé:</strong> {summary}</p>
+                <p><strong>Note moyenne:</strong> {avg_rating:.2f} / 5 (sur {nb_rating} avis)</p>
+                <p><strong>Réalisateurs:</strong> {directors}</p>
+                <p><strong>Genre:</strong> {genre}</p>
+                <p><strong>Scénaristes:</strong> {writers}</p>
+                <p><strong>Acteurs principaux:</strong> {stars}</p>
+                <p><strong>Durée:</strong> {duration} minutes</p>
+            </div>
+            </div>
     """
     return html
+
+
 
 
 def get_movie_rating():
@@ -74,8 +87,6 @@ with st.sidebar:
                 st.session_state.token = connect(username, password)
         except Exception as e:
             st.write(f"Problème d'authentification 😭 {e}")
-        else:
-            st.write("OK 👌🏿")
     if 'token' in st.session_state:
         st.write("Vous êtes connecté 👌🏿")
     else:
@@ -98,7 +109,7 @@ with tab1:
             response = requests.get(
                 url=APIURL+"/client_recommendation/",
                 headers={'accept': 'application/json',
-                         'Authorization': 'Bearer ' + st.session_state.token}
+                            'Authorization': 'Bearer ' + st.session_state.token}
             )
             if response.status_code == 200:
                 recommendations = response.json().get("recommendations")
@@ -106,12 +117,13 @@ with tab1:
                     st.write(afficher_films(r.get("movieid"),
                                             r.get("predicted_rating")
                                             ),
-                             unsafe_allow_html=True
-                             )
+                                unsafe_allow_html=True
+                                )
                     st.write("------")
-        except Exception:
+        except Exception as e :
             st.write("Ce service est réservé uniquement aux clients authentifiés. Pour obtenir des\
                       recommandations veuillez saisir vos préférences dans l'onglet 'Recherche'")
+            print(e)
 
 
 def afficher_etoiles(note):
@@ -240,7 +252,6 @@ with tab4:
             else:
                 st.session_state.movies = movies
                 for m in movies:
-                    st.write(f"### ID Movie: {m['movieid']}")
                     st.write(afficher_films(
                         m['movieid']), unsafe_allow_html=True)
                     if 'token' in st.session_state:
