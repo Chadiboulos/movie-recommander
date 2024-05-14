@@ -1,10 +1,10 @@
-CREATE TABLE genre (
+CREATE TABLE IF NOT EXISTS genre (
 	genreid serial4 NOT NULL,
 	"name" varchar NOT NULL,
 	CONSTRAINT genre_pkey PRIMARY KEY (genreid)
 );
 
-CREATE TABLE movie (
+CREATE TABLE IF NOT EXISTS  movie (
 	movieid serial4 NOT NULL,
 	title varchar NOT NULL,
 	imdbid int4 NULL,
@@ -13,7 +13,7 @@ CREATE TABLE movie (
 	decade int4 NULL,
 	CONSTRAINT movie_pkey PRIMARY KEY (movieid)
 );
-CREATE TABLE imdb_data (
+CREATE TABLE IF NOT EXISTS imdb_data (
 	movieid int4 NOT NULL,
 	titre varchar(255) NULL,
 	summary text NULL,
@@ -27,7 +27,7 @@ CREATE TABLE imdb_data (
 );
 CREATE INDEX movie_decade_idx ON movie USING btree (decade);
 CREATE INDEX movie_year_idx ON movie USING btree (year);
-CREATE TABLE model_prediction (
+CREATE TABLE IF NOT EXISTS model_prediction (
 	modelid serial4 NOT NULL,
 	class_name varchar NULL,
 	params varchar NULL,
@@ -37,7 +37,7 @@ CREATE TABLE model_prediction (
 	end_date timestamp NULL,
 	CONSTRAINT model_prediction_pkey PRIMARY KEY (modelid)
 );
-CREATE TABLE movie_genre (
+CREATE TABLE IF NOT EXISTS movie_genre (
 	movieid int4 NOT NULL,
 	genreid int4 NOT NULL,
 	CONSTRAINT movie_genre_pkey PRIMARY KEY (movieid, genreid),
@@ -45,7 +45,7 @@ CREATE TABLE movie_genre (
 	CONSTRAINT movie_genre_movieid_fkey FOREIGN KEY (movieid) REFERENCES movie(movieid)
 );
 CREATE INDEX movie_genre_movieid_idx ON movie_genre USING btree (movieid);
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
 	userid serial4 NOT NULL,
 	username varchar NOT NULL,
 	"password" varchar NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE users (
 	CONSTRAINT username_unique UNIQUE (username),
 	CONSTRAINT users_pk PRIMARY KEY (userid)
 );
-CREATE TABLE rating (
+CREATE TABLE IF NOT EXISTS rating (
 	userid int4 NOT NULL,
 	movieid int4 NOT NULL,
 	rating float8 NOT NULL,
