@@ -216,6 +216,7 @@ refresh_table_recap_view()
 print("Terminer !!!")
 print(datetime.datetime.now())
 
+## Activation des DAB airflow
 
 airflow_api_url = os.environ.get("AIRFLOW_URL")
 airflow_user = os.environ.get("AIRFLOW_USER")
